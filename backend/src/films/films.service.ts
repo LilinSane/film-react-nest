@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { FilmRepository } from '../repository/film.repository';
 import {
   FilmScheduleDto,
@@ -21,15 +22,9 @@ export class FilmsService {
       throw new NotFoundException(`Film "${id}" was not found`);
     }
 
-    const items: FilmScheduleDto[] = film.schedule.map((session) => ({
-      id: session.id,
-      daytime: session.daytime,
-      hall: String(session.hall),
-      rows: session.rows,
-      seats: session.seats,
-      price: session.price,
-      taken: session.taken,
-    }));
+    const items = film.schedule.map((session) =>
+      plainToInstance(FilmScheduleDto, session),
+    );
 
     return { total: items.length, items };
   }

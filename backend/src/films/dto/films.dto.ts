@@ -1,3 +1,5 @@
+import { Transform } from 'class-transformer';
+
 export class FilmDto {
   id!: string;
   rating!: number;
@@ -18,6 +20,8 @@ export class FilmsDto {
 export class FilmScheduleDto {
   id!: string;
   daytime!: string;
+
+  @Transform(({ value }) => String(value))
   hall!: string;
   rows!: number;
   seats!: number;

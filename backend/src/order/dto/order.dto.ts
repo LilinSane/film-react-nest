@@ -1,27 +1,54 @@
-export class TicketDto {
+import { Type } from 'class-transformer';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  Min,
+  ValidateNested,
+} from 'class-validator';
+
+export class TicketRequestDto {
+  @IsString()
+  @IsNotEmpty()
+  film!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  session!: string;
+
+  @IsInt()
+  @Min(1)
+  row!: number;
+
+  @IsInt()
+  @Min(1)
+  seat!: number;
+}
+
+export class TicketResponseDto {
   film!: string;
   session!: string;
-  daytime?: string;
-  day?: string;
-  time?: string;
+  daytime!: string;
   row!: number;
   seat!: number;
-  price?: number;
+  price!: number;
+  id!: string;
 }
 
-export class OrderDto {
+export class OrderRequestDto {
   email!: string;
   phone!: string;
-  tickets!: TicketDto[];
-}
 
-export class OrderResultDto extends TicketDto {
-  id!: string;
+  @IsArray()
+  @ArrayNotEmpty()
+  @ValidateNested({ each: true })
+  @Type(() => TicketRequestDto)
+  tickets!: TicketRequestDto[];
 }
 
 export class OrderResponseDto {
   total!: number;
-  items!: OrderResultDto[];
+  items!: TicketResponseDto[];
 }
-
-export type OrderRequestDto = OrderDto | TicketDto[];

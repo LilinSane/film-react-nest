@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Film } from '../films/schemas/film.schema';
-import { FilmRepository } from './film.repository';
+import { FilmRepository, FilmWithSchedule } from './film.repository';
 
 @Injectable()
 export class MongoFilmRepository extends FilmRepository {
@@ -31,11 +31,11 @@ export class MongoFilmRepository extends FilmRepository {
       .exec();
   }
 
-  findById(id: string): Promise<Film | null> {
+  findById(id: string): Promise<FilmWithSchedule | null> {
     return this.filmModel
       .findOne({ id })
       .select({ _id: 0, id: 1, schedule: 1 })
-      .lean()
+      .lean<FilmWithSchedule>()
       .exec();
   }
 

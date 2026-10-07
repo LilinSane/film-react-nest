@@ -10,8 +10,8 @@ import { FilmRepository } from '../repository/film.repository';
 import {
   OrderRequestDto,
   OrderResponseDto,
-  OrderResultDto,
-  TicketDto,
+  TicketRequestDto,
+  TicketResponseDto,
 } from './dto/order.dto';
 
 interface SeatReservation {
@@ -25,12 +25,8 @@ export class OrderService {
   constructor(private readonly filmsRepository: FilmRepository) {}
 
   async create(order: OrderRequestDto): Promise<OrderResponseDto> {
-    const tickets = Array.isArray(order) ? order : order?.tickets;
-    if (!Array.isArray(tickets) || tickets.length === 0) {
-      throw new BadRequestException('At least one ticket is required');
-    }
-
-    this.validateTickets(tickets);
+    const { tickets } = order;
+    this.ensureNoDuplicateSeats(tickets);
 
     const schedules = new Map<string, FilmSchedule>();
     for (const ticket of tickets) {
@@ -81,10 +77,13 @@ export class OrderService {
       throw error;
     }
 
-    const items: OrderResultDto[] = tickets.map((ticket) => {
+    const items: TicketResponseDto[] = tickets.map((ticket) => {
       const session = schedules.get(`${ticket.film}:${ticket.session}`)!;
       return {
-        ...ticket,
+        film: ticket.film,
+        session: ticket.session,
+        row: ticket.row,
+        seat: ticket.seat,
         id: randomUUID(),
         daytime: session.daytime,
         price: session.price,
@@ -94,25 +93,9 @@ export class OrderService {
     return { total: items.length, items };
   }
 
-  private validateTickets(tickets: TicketDto[]): void {
+  private ensureNoDuplicateSeats(tickets: TicketRequestDto[]): void {
     const requestedSeats = new Set<string>();
     for (const ticket of tickets) {
-      if (
-        !ticket ||
-        typeof ticket.film !== 'string' ||
-        ticket.film.length === 0 ||
-        typeof ticket.session !== 'string' ||
-        ticket.session.length === 0 ||
-        !Number.isInteger(ticket.row) ||
-        !Number.isInteger(ticket.seat) ||
-        ticket.row < 1 ||
-        ticket.seat < 1
-      ) {
-        throw new BadRequestException(
-          'Each ticket must include film, session, and positive row and seat numbers',
-        );
-      }
-
       const key = `${ticket.film}:${ticket.session}:${ticket.row}:${ticket.seat}`;
       if (requestedSeats.has(key)) {
         throw new BadRequestException(
@@ -124,7 +107,7 @@ export class OrderService {
   }
 
   private validateSeatBounds(
-    tickets: TicketDto[],
+    tickets: TicketRequestDto[],
     schedules: Map<string, FilmSchedule>,
   ): void {
     for (const ticket of tickets) {

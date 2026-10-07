@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Film } from '../films/schemas/film.schema';
-import { FilmRepository } from './film.repository';
+import { FilmRepository, FilmWithSchedule } from './film.repository';
 
 @Injectable()
 export class InMemoryFilmRepository extends FilmRepository {
@@ -21,9 +21,17 @@ export class InMemoryFilmRepository extends FilmRepository {
     return [...this.films.values()].map((film) => this.cloneFilm(film));
   }
 
-  async findById(id: string): Promise<Film | null> {
+  async findById(id: string): Promise<FilmWithSchedule | null> {
     const film = this.films.get(id);
-    return film ? this.cloneFilm(film) : null;
+    return film
+      ? {
+          id: film.id,
+          schedule: film.schedule.map((session) => ({
+            ...session,
+            taken: [...session.taken],
+          })),
+        }
+      : null;
   }
 
   async reserveSeat(

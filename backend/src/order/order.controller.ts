@@ -2,7 +2,7 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { OrderRequestDto, OrderResponseDto } from './dto/order.dto';
 import { OrderService } from './order.service';
 
-@Controller(['order', 'api/afisha/order'])
+@Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
