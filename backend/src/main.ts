@@ -1,11 +1,24 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import 'dotenv/config'
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix("api/afisha");
+  const config = app.get(ConfigService);
+  const databaseDriver = config.getOrThrow<string>('DATABASE_DRIVER');
+  if (databaseDriver !== 'memory' && databaseDriver !== 'mongodb') {
+    throw new Error(
+      `Unsupported database driver "${databaseDriver}". Use "memory" or "mongodb".`,
+    );
+  }
+
+  const port = Number(config.get<string>('PORT', '3000'));
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error('PORT must be an integer between 1 and 65535');
+  }
+
+  app.setGlobalPrefix('api/afisha');
   app.enableCors();
-  await app.listen(3000);
+  await app.listen(port);
 }
 bootstrap();
