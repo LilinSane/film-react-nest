@@ -1,0 +1,76 @@
+services:
+  frontend:
+    image: ghcr.io/lilinsane/film-react-nest-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: "no"
+    volumes:
+      - frontend-dist:/usr/share/nginx/html
+
+  backend:
+    image: ghcr.io/lilinsane/film-react-nest-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    environment:
+      DATABASE_URL: postgres://database:5432/${DATABASE_NAME:-prac}
+      PORT: 3000
+    expose:
+      - "3000"
+    depends_on:
+      database:
+        condition: service_started
+    restart: unless-stopped
+
+  nginx:
+    image: ghcr.io/lilinsane/film-react-nest-nginx:latest
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - frontend-dist:/usr/share/nginx/html:ro
+    depends_on:
+      frontend:
+        condition: service_completed_successfully
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+  database:
+    image: postgres:16-alpine
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-prac}
+      POSTGRES_USER: ${DATABASE_USERNAME:-prac}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    env_file:
+      - ./.env
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin-local-password}
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      database:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  frontend-dist:
+  postgres-data:
+  pgadmin-data:
