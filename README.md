@@ -32,5 +32,13 @@ MongoDB должна быть установлена и запущена.
 Для проверки отправьте тестовый запрос с помощью Postman или `curl`.
 
 
+## Деплой
 
+- GitHub Actions: https://github.com/LilinSane/film-react-nest/actions/runs/40657593376
+- Образ backend: https://github.com/LilinSane/film-react-nest/pkgs/container/film-react-nest-backend
+- Образ frontend: https://github.com/LilinSane/film-react-nest/pkgs/container/film-react-nest-frontend
+- Образ nginx: https://github.com/LilinSane/film-react-nest/pkgs/container/film-react-nest-nginx
 
+Скриншот успешной работы:
+
+![img.png](img.png)
