@@ -1,8 +1,12 @@
-import { Injectable, LoggerService } from '@nestjs/common';
+import { Injectable, LoggerService, LogLevel } from '@nestjs/common';
 
 @Injectable()
 export class TskvLogger implements LoggerService {
-  formatMessage(level: string, message: any, ...optionalParams: any[]) {
+  formatMessage(
+    level: LogLevel,
+    message: unknown,
+    ...optionalParams: unknown[]
+  ): string {
     const fields: [string, string][] = [
       ['time', new Date().toISOString()],
       ['level', level],
@@ -18,31 +22,35 @@ export class TskvLogger implements LoggerService {
       .join('\t');
   }
 
-  log(message: any, ...optionalParams: any[]) {
+  log(message: unknown, ...optionalParams: unknown[]): void {
     this.write('log', message, optionalParams);
   }
 
-  error(message: any, ...optionalParams: any[]) {
+  error(message: unknown, ...optionalParams: unknown[]): void {
     this.write('error', message, optionalParams);
   }
 
-  warn(message: any, ...optionalParams: any[]) {
+  warn(message: unknown, ...optionalParams: unknown[]): void {
     this.write('warn', message, optionalParams);
   }
 
-  debug(message: any, ...optionalParams: any[]) {
+  debug(message: unknown, ...optionalParams: unknown[]): void {
     this.write('debug', message, optionalParams);
   }
 
-  verbose(message: any, ...optionalParams: any[]) {
+  verbose(message: unknown, ...optionalParams: unknown[]): void {
     this.write('verbose', message, optionalParams);
   }
 
-  fatal(message: any, ...optionalParams: any[]) {
+  fatal(message: unknown, ...optionalParams: unknown[]): void {
     this.write('fatal', message, optionalParams);
   }
 
-  private write(level: string, message: any, optionalParams: any[]) {
+  private write(
+    level: LogLevel,
+    message: unknown,
+    optionalParams: unknown[],
+  ): void {
     const line = this.formatMessage(level, message, ...optionalParams);
     if (level === 'error' || level === 'fatal') {
       console.error(line);
@@ -53,7 +61,7 @@ export class TskvLogger implements LoggerService {
     }
   }
 
-  private toLogString(value: any): string {
+  private toLogString(value: unknown): string {
     if (value instanceof Error) {
       return value.stack ?? `${value.name}: ${value.message}`;
     }
