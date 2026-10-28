@@ -13,14 +13,19 @@ import { OrderService } from './order/order.service';
 import { FilmRepository } from './repository/film.repository';
 import { InMemoryFilmRepository } from './repository/in-memory-film.repository';
 import { MongoFilmRepository } from './repository/mongodb-film.repository';
+import { PostgresDatabaseModule } from './database/postgres/postgres-database.module';
 import { Film, FilmSchema } from './films/schemas/film.schema';
 
-function hasDatabaseDriver(expected: 'memory' | 'mongodb') {
+function hasDatabaseDriver(expected: 'memory' | 'mongodb' | 'postgres') {
   return (env: NodeJS.ProcessEnv) => {
     const databaseDriver = env.DATABASE_DRIVER;
-    if (databaseDriver !== 'memory' && databaseDriver !== 'mongodb') {
+    if (
+      databaseDriver !== 'memory' &&
+      databaseDriver !== 'mongodb' &&
+      databaseDriver !== 'postgres'
+    ) {
       throw new Error(
-        `Unsupported database driver "${databaseDriver}". Use "memory" or "mongodb".`,
+        `Unsupported database driver "${databaseDriver}". Use "memory", "mongodb", or "postgres".`,
       );
     }
     return databaseDriver === expected;
@@ -88,6 +93,10 @@ class MongoDatabaseModule {}
     ConditionalModule.registerWhen(
       MongoDatabaseModule,
       hasDatabaseDriver('mongodb'),
+    ),
+    ConditionalModule.registerWhen(
+      PostgresDatabaseModule,
+      hasDatabaseDriver('postgres'),
     ),
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, '..', 'public', 'content', 'afisha'),

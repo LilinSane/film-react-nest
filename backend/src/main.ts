@@ -6,9 +6,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
   const databaseDriver = config.getOrThrow<string>('DATABASE_DRIVER');
-  if (databaseDriver !== 'memory' && databaseDriver !== 'mongodb') {
+  if (
+    databaseDriver !== 'memory' &&
+    databaseDriver !== 'mongodb' &&
+    databaseDriver !== 'postgres'
+  ) {
     throw new Error(
-      `Unsupported database driver "${databaseDriver}". Use "memory" or "mongodb".`,
+      `Unsupported database driver "${databaseDriver}". Use "memory", "mongodb", or "postgres".`,
     );
   }
 

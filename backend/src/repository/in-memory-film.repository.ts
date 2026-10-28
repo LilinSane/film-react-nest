@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Film } from '../films/schemas/film.schema';
-import { FilmRepository, FilmWithSchedule } from './film.repository';
+import {
+  FilmRepository,
+  FilmSummary,
+  FilmWithSchedule,
+} from './film.repository';
 
 @Injectable()
 export class InMemoryFilmRepository extends FilmRepository {
@@ -17,7 +21,7 @@ export class InMemoryFilmRepository extends FilmRepository {
     }
   }
 
-  async findAll(): Promise<Film[]> {
+  async findAll(): Promise<FilmSummary[]> {
     return [...this.films.values()].map((film) => this.cloneFilm(film));
   }
 

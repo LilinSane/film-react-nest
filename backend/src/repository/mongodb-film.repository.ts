@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Film } from '../films/schemas/film.schema';
-import { FilmRepository, FilmWithSchedule } from './film.repository';
+import {
+  FilmRepository,
+  FilmSummary,
+  FilmWithSchedule,
+} from './film.repository';
 
 @Injectable()
 export class MongoFilmRepository extends FilmRepository {
@@ -10,7 +14,7 @@ export class MongoFilmRepository extends FilmRepository {
     super();
   }
 
-  findAll(): Promise<Film[]> {
+  findAll(): Promise<FilmSummary[]> {
     return this.filmModel
       .find(
         {},
